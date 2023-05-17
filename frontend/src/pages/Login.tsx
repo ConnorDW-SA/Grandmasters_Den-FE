@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../zustand/Store";
-import { useLoginRegister } from "../react-query/Actions";
+import { useLoginRegister } from "../zustand/Actions";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,19 +9,13 @@ const LoginPage = () => {
   const setUser = useStore((state) => state.setUser);
   const setLoginState = useStore((state) => state.setLoginState);
 
-  const { mutate, isLoading, isError } = useLoginRegister({
-    onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.accessToken);
-      setUser({ ...data.user, username: data.user.username });
-      setLoginState(true);
-    }
-  });
+  const { loginRegister, error } = useLoginRegister();
 
   const switchForm = () => {
     setIsLogin(!isLogin);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const email = (
@@ -35,7 +29,11 @@ const LoginPage = () => {
       : (event.currentTarget.elements.namedItem("username") as HTMLInputElement)
           .value;
 
-    mutate({ email, password, username });
+    await loginRegister({ email, password, username }, (user, accessToken) => {
+      localStorage.setItem("accessToken", accessToken);
+      setUser({ ...user, username: user.username });
+      setLoginState(true);
+    });
   };
 
   return (
@@ -69,7 +67,7 @@ const LoginPage = () => {
               required
             />
           )}
-
+          {error && <p className="text-danger">{error}</p>}
           <button type="submit" className="btn btn-secondary">
             {isLogin ? "Login" : "Register"}
           </button>
@@ -82,8 +80,6 @@ const LoginPage = () => {
           {isLogin ? "Register" : "Login"}
         </button>
       </div>
-      {isLoading && <p>Loading...</p>}
-      {isError && <p>Error logging in or registering</p>}
     </div>
   );
 };

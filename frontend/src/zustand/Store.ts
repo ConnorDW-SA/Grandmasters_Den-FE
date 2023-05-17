@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface User {
-  // Add the properties of the user object that you expect here
   username: string;
 }
 
