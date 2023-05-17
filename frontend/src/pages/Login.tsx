@@ -1,15 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../zustand/Store";
-import { useLoginRegister } from "../zustand/Actions";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
 
-  const setUser = useStore((state) => state.setUser);
-  const setLoginState = useStore((state) => state.setLoginState);
-
-  const { loginRegister, error } = useLoginRegister();
+  const loginRegister = useStore((state) => state.loginRegister);
+  const error = useStore((state) => state.error);
 
   const switchForm = () => {
     setIsLogin(!isLogin);
@@ -29,11 +26,7 @@ const LoginPage = () => {
       : (event.currentTarget.elements.namedItem("username") as HTMLInputElement)
           .value;
 
-    await loginRegister({ email, password, username }, (user, accessToken) => {
-      localStorage.setItem("accessToken", accessToken);
-      setUser({ ...user, username: user.username });
-      setLoginState(true);
-    });
+    await loginRegister({ email, password, username });
   };
 
   return (

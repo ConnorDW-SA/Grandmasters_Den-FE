@@ -1,51 +1,52 @@
-import { useState } from "react";
-
-interface LoginRegisterData {
+export interface LoginRegisterData {
   email: string;
   password: string;
   username?: string;
 }
 
-export const useLoginRegister = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export interface UseLoginRegisterOptions {
+  setUser: (user: any) => void;
+  setLoginState: (isLoggedIn: boolean) => void;
+  setIsLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+}
 
-  const loginRegister = async (
-    { email, password, username }: LoginRegisterData,
-    successCallback: (user: any, accessToken: string) => void
-  ): Promise<void> => {
-    setIsLoading(true);
-    setError(null);
+export const loginRegister = async (
+  { email, password, username }: LoginRegisterData,
+  { setUser, setLoginState, setIsLoading, setError }: UseLoginRegisterOptions
+): Promise<void> => {
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      const response = await fetch(
-        `http://localhost:3001/users/${username ? "register" : "login"}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, username })
-        }
-      );
-
-      if (response.ok) {
-        const { user, accessToken } = await response.json();
-        successCallback(user, accessToken);
-      } else {
-        const statusCode = response.status;
-
-        let customErrorMessage = "Unknown error";
-        if (statusCode === 401) {
-          customErrorMessage = "Invalid email or password";
-        } else if (statusCode === 403) {
-          customErrorMessage = "Forbidden";
-        }
-
-        setError(customErrorMessage);
+  try {
+    const response = await fetch(
+      `http://localhost:3001/users/${username ? "register" : "login"}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, username })
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    );
 
-  return { loginRegister, isLoading, error };
+    if (response.ok) {
+      const { user, accessToken } = await response.json();
+      localStorage.setItem("accessToken", accessToken);
+
+      setUser({ ...user, username: user.username });
+      setLoginState(true);
+    } else {
+      const statusCode = response.status;
+
+      let customErrorMessage = "Unknown error";
+      if (statusCode === 401) {
+        customErrorMessage = "Invalid email or password";
+      } else if (statusCode === 403) {
+        customErrorMessage = "Forbidden";
+      }
+
+      setError(customErrorMessage);
+    }
+  } finally {
+    setIsLoading(false);
+  }
 };
