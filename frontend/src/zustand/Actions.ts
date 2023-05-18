@@ -4,20 +4,11 @@ export interface LoginRegisterData {
   username?: string;
 }
 
-export interface UseLoginRegisterOptions {
-  setUser: (user: any) => void;
-  setLoginState: (isLoggedIn: boolean) => void;
-  setIsLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-}
-
-export const loginRegister = async (
-  { email, password, username }: LoginRegisterData,
-  { setUser, setLoginState, setIsLoading, setError }: UseLoginRegisterOptions
-): Promise<void> => {
-  setIsLoading(true);
-  setError(null);
-
+export const loginRegister = async ({
+  email,
+  password,
+  username
+}: LoginRegisterData): Promise<{ user?: any; error?: string }> => {
   try {
     const response = await fetch(
       `http://localhost:3001/users/${username ? "register" : "login"}`,
@@ -32,8 +23,7 @@ export const loginRegister = async (
       const { user, accessToken } = await response.json();
       localStorage.setItem("accessToken", accessToken);
 
-      setUser({ ...user, username: user.username });
-      setLoginState(true);
+      return { user: { ...user, username: user.username } };
     } else {
       const statusCode = response.status;
 
@@ -44,9 +34,9 @@ export const loginRegister = async (
         customErrorMessage = "Forbidden";
       }
 
-      setError(customErrorMessage);
+      return { error: customErrorMessage };
     }
-  } finally {
-    setIsLoading(false);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 };

@@ -1,16 +1,20 @@
 import React from "react";
-import Login from "./pages/Login";
+import LoginPage from "./pages/Login";
+import HomePage from "./pages/Home";
 import "./App.css";
-import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import "bootstrap/dist/css/bootstrap.min.css";
-const queryClient = new QueryClient();
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
       <div className="App">
-        <Login />
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/home" element={<HomePage />} />
+        </Routes>
       </div>
-    </QueryClientProvider>
+    </BrowserRouter>
   );
 }

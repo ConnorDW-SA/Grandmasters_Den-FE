@@ -1,12 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../zustand/Store";
+import Form from "../components/login/Form";
 
-const LoginPage = () => {
+const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const navigate = useNavigate();
+  const isLoggedIn = useStore((state) => state.isLoggedIn);
 
   const loginRegister = useStore((state) => state.loginRegister);
   const error = useStore((state) => state.error);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/home");
+    }
+  }, [isLoggedIn, navigate]);
 
   const switchForm = () => {
     setIsLogin(!isLogin);
@@ -33,38 +42,7 @@ const LoginPage = () => {
     <div className="login-page d-flex justify-content-center align-items-center">
       <div className="login-form">
         <h1 className="text-light">{isLogin ? "Login" : "Register"}</h1>
-        <form
-          onSubmit={handleSubmit}
-          className="d-flex flex-column justify-content-between h-25"
-        >
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="Email"
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Password"
-            required
-          />
-          {!isLogin && (
-            <input
-              type="text"
-              name="username"
-              id="username"
-              placeholder="Username"
-              required
-            />
-          )}
-          {error && <p className="text-danger">{error}</p>}
-          <button type="submit" className="btn btn-secondary">
-            {isLogin ? "Login" : "Register"}
-          </button>
-        </form>
+        <Form isLogin={isLogin} handleSubmit={handleSubmit} error={error} />
         <button
           type="button"
           className="btn btn-link text-light"

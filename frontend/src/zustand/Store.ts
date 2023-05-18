@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { persist, createJSONStorage, StateStorage } from "zustand/middleware";
 import {
   loginRegister as loginRegisterAction,
   LoginRegisterData
@@ -17,37 +17,47 @@ interface StoreState {
   setUser: (user: User | null) => void;
   setLoginState: (isLoggedIn: boolean) => void;
   loginRegister: (data: LoginRegisterData) => Promise<void>;
+  logState: () => void;
 }
 
 export const useStore = create<StoreState>()(
   persist(
-    (set, get) => {
-      const setUser = (user: User | null) => set({ user });
-      const setLoginState = (isLoggedIn: boolean) => set({ isLoggedIn });
+    (set, get) => ({
+      user: null,
+      isLoggedIn: false,
+      isLoading: false,
+      error: null,
+      setUser: (user: User | null) => set({ user }),
 
-      const loginRegister = async (data: LoginRegisterData): Promise<void> => {
-        const isLoading = (loading: boolean) => set({ isLoading: loading });
-        const setError = (error: string | null) => set({ error });
+      setLoginState: (isLoggedIn: boolean) => set({ isLoggedIn }),
 
-        await loginRegisterAction(data, {
-          setUser,
-          setLoginState,
-          setIsLoading: isLoading,
-          setError: setError
-        });
-      };
+      loginRegister: async (data: LoginRegisterData) => {
+        set({ isLoading: true, error: null });
+        const { user, error } = await loginRegisterAction(data);
+        if (user) {
+          set({ user, isLoggedIn: true });
+          set({ isLoading: false });
+        } else if (error) {
+          set({ error });
+          set({ isLoading: false });
+        }
+      },
 
-      return {
-        user: null,
-        isLoggedIn: false,
-        isLoading: false,
-        error: null,
-        setUser,
-        setLoginState,
-        loginRegister
-      };
-    },
+      logState: () => {
+        console.log(
+          "Current state: ",
+          get().user,
+          "logged in:",
+          get().isLoggedIn
+        );
+      }
+    }),
     {
+      partialize(state) {
+        return Object.fromEntries(
+          Object.entries(state).filter(([key]) => !["error"].includes(key))
+        );
+      },
       name: "user",
       storage: createJSONStorage(() => localStorage)
     }
