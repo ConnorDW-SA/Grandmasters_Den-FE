@@ -73,3 +73,42 @@ export const fetchUsersAction = async (): Promise<{
     return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 };
+
+export interface gameData {
+  id: string;
+  player1: object;
+  player2: object;
+  boardState: object;
+  currentPlayer: object;
+  moveHistory: [];
+}
+
+export const fetchGamesAction = async (): Promise<{
+  games?: gameData[];
+  error?: string;
+}> => {
+  try {
+    const response = await fetch("http://localhost:3001/games/userGames", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    });
+    if (response.ok) {
+      const games: gameData[] = await response.json();
+      return { games };
+    } else {
+      const statusCode = response.status;
+      let customErrorMessage = "Unknown error occurred while fetching games.";
+      if (statusCode === 403) {
+        customErrorMessage =
+          "Forbidden. You don't have permission to access game data.";
+      } else if (statusCode === 500) {
+        customErrorMessage = "Server error occurred while fetching games.";
+      }
+
+      return { error: customErrorMessage };
+    }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unknown error" };
+  }
+};

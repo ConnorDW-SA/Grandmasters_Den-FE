@@ -4,7 +4,9 @@ import {
   LoginRegisterData,
   loginRegisterAction,
   fetchUsersAction,
-  allUserData
+  allUserData,
+  fetchGamesAction,
+  gameData
 } from "./Actions";
 
 interface User {
@@ -14,7 +16,9 @@ interface User {
 interface StoreState {
   user: User | null;
   users: allUserData[] | null;
+  games: gameData[] | null;
   fetchUsers: () => Promise<void>;
+  fetchGames: () => Promise<void>;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
@@ -29,7 +33,8 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       user: null,
-      users: null,
+      users: [],
+      games: [],
       isLoggedIn: false,
       isLoading: false,
       error: null,
@@ -51,6 +56,15 @@ export const useStore = create<StoreState>()(
         const { users, error } = await fetchUsersAction();
         if (users) {
           set({ users, isLoading: false });
+        } else if (error) {
+          set({ error, isLoading: false });
+        }
+      },
+      fetchGames: async () => {
+        set({ isLoading: true, error: null });
+        const { games, error } = await fetchGamesAction();
+        if (games) {
+          set({ games, isLoading: false });
         } else if (error) {
           set({ error, isLoading: false });
         }

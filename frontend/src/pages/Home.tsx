@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useStore } from "../zustand/Store";
-
-export default function HomePage() {
-  const username = useStore((state) => state.user?.username);
+import { useNavigate } from "react-router-dom";
+const HomePage: React.FC = () => {
   const logState = useStore((state) => state.logState);
   const fetchUsers = useStore((state) => state.fetchUsers);
+  const navigate = useNavigate();
+  const currentUser = useStore((state) => state.user);
+
+  const users = useStore((state) => state.users);
   useEffect(() => {
     fetchUsers();
     logState();
@@ -12,7 +15,9 @@ export default function HomePage() {
 
   return (
     <div>
-      <h1>Hello {username}</h1>
+      <h1>Hello {currentUser?.username}</h1>
     </div>
   );
-}
+};
+
+export default HomePage;

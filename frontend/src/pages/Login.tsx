@@ -10,10 +10,11 @@ const LoginPage: React.FC = () => {
   useStore((state) => state.logState());
   const loginRegister = useStore((state) => state.loginRegister);
   const error = useStore((state) => state.error);
+  const username = useStore((state) => state.user?.username);
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/home");
+      navigate(`/home/${username}`);
     }
   }, [isLoggedIn, navigate]);
 
