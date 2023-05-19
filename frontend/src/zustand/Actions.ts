@@ -4,7 +4,7 @@ export interface LoginRegisterData {
   username?: string;
 }
 
-export const loginRegister = async ({
+export const loginRegisterAction = async ({
   email,
   password,
   username
@@ -38,5 +38,31 @@ export const loginRegister = async ({
     }
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unknown error" };
+  }
+};
+
+export interface UserData {
+  id: string;
+  username: string;
+  email: string;
+}
+
+export const fetchUsers = async (): Promise<UserData[]> => {
+  try {
+    const response = await fetch("http://localhost:3001/users/allUsers", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+      return data.users;
+    } else {
+      throw new Error("Failed to fetch users");
+    }
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Unknown error");
   }
 };

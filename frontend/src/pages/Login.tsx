@@ -7,7 +7,7 @@ const LoginPage: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const isLoggedIn = useStore((state) => state.isLoggedIn);
-
+  useStore((state) => state.logState());
   const loginRegister = useStore((state) => state.loginRegister);
   const error = useStore((state) => state.error);
 

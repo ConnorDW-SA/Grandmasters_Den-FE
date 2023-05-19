@@ -1,8 +1,10 @@
 import { create } from "zustand";
-import { persist, createJSONStorage, StateStorage } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import {
-  loginRegister as loginRegisterAction,
-  LoginRegisterData
+  loginRegisterAction,
+  LoginRegisterData,
+  fetchUsers,
+  UserData
 } from "./Actions";
 
 interface User {
@@ -11,24 +13,28 @@ interface User {
 
 interface StoreState {
   user: User | null;
+  users: User[] | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
   setUser: (user: User | null) => void;
-  setLoginState: (isLoggedIn: boolean) => void;
   loginRegister: (data: LoginRegisterData) => Promise<void>;
+  setUsers: (users: User[] | null) => void;
+  fetchUsers: (data: UserData) => Promise<void>;
   logState: () => void;
+  setLoginState: (isLoggedIn: boolean) => void;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       user: null,
+      users: null,
       isLoggedIn: false,
       isLoading: false,
       error: null,
       setUser: (user: User | null) => set({ user }),
-
+      setUsers: (users: User[] | null) => set({ users }),
       setLoginState: (isLoggedIn: boolean) => set({ isLoggedIn }),
 
       loginRegister: async (data: LoginRegisterData) => {
@@ -42,14 +48,25 @@ export const useStore = create<StoreState>()(
           set({ isLoading: false });
         }
       },
-
+      fetchUsers: async () => {
+        try {
+          const users = await fetchUsers();
+          set({ users });
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      },
       logState: () => {
-        console.log(
-          "Current state: ",
-          get().user,
-          "logged in:",
-          get().isLoggedIn
-        );
+        setTimeout(() => {
+          console.log(
+            "Current state:",
+            get().user,
+            "logged in:",
+            get().isLoggedIn,
+            "users:",
+            get().users
+          );
+        }, 100);
       }
     }),
     {
