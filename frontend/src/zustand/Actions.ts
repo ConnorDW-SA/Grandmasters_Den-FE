@@ -30,10 +30,7 @@ export const loginRegisterAction = async ({
       let customErrorMessage = "Unknown error";
       if (statusCode === 401) {
         customErrorMessage = "Invalid email or password";
-      } else if (statusCode === 403) {
-        customErrorMessage = "Forbidden";
       }
-
       return { error: customErrorMessage };
     }
   } catch (error) {
