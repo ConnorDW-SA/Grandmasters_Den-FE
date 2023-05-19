@@ -1,6 +1,6 @@
 export interface LoginRegisterData {
   email: string;
-  password: string;
+  password?: string;
   username?: string;
 }
 
@@ -41,28 +41,38 @@ export const loginRegisterAction = async ({
   }
 };
 
-export interface UserData {
+export interface allUserData {
   id: string;
-  username: string;
   email: string;
+  username: string;
 }
 
-export const fetchUsers = async (): Promise<UserData[]> => {
+export const fetchUsersAction = async (): Promise<{
+  users?: allUserData[];
+  error?: string;
+}> => {
   try {
     const response = await fetch("http://localhost:3001/users/allUsers", {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`
       }
     });
-
     if (response.ok) {
-      const data = await response.json();
-      console.log(data);
-      return data.users;
+      const users: allUserData[] = await response.json();
+      return { users };
     } else {
-      throw new Error("Failed to fetch users");
+      const statusCode = response.status;
+      let customErrorMessage = "Unknown error occurred while fetching users.";
+      if (statusCode === 403) {
+        customErrorMessage =
+          "Forbidden. You don't have permission to access user data.";
+      } else if (statusCode === 500) {
+        customErrorMessage = "Server error occurred while fetching users.";
+      }
+
+      return { error: customErrorMessage };
     }
   } catch (error) {
-    throw new Error(error instanceof Error ? error.message : "Unknown error");
+    return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 };

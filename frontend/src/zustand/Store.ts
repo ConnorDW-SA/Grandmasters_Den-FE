@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import {
-  loginRegisterAction,
   LoginRegisterData,
-  fetchUsers,
-  UserData
+  loginRegisterAction,
+  fetchUsersAction,
+  allUserData
 } from "./Actions";
 
 interface User {
@@ -13,14 +13,14 @@ interface User {
 
 interface StoreState {
   user: User | null;
-  users: User[] | null;
+  users: allUserData[] | null;
+  fetchUsers: () => Promise<void>;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
   setUser: (user: User | null) => void;
   loginRegister: (data: LoginRegisterData) => Promise<void>;
-  setUsers: (users: User[] | null) => void;
-  fetchUsers: (data: UserData) => Promise<void>;
+
   logState: () => void;
   setLoginState: (isLoggedIn: boolean) => void;
 }
@@ -34,9 +34,7 @@ export const useStore = create<StoreState>()(
       isLoading: false,
       error: null,
       setUser: (user: User | null) => set({ user }),
-      setUsers: (users: User[] | null) => set({ users }),
       setLoginState: (isLoggedIn: boolean) => set({ isLoggedIn }),
-
       loginRegister: async (data: LoginRegisterData) => {
         set({ isLoading: true, error: null });
         const { user, error } = await loginRegisterAction(data);
@@ -49,11 +47,12 @@ export const useStore = create<StoreState>()(
         }
       },
       fetchUsers: async () => {
-        try {
-          const users = await fetchUsers();
-          set({ users });
-        } catch (error) {
-          console.error("Error fetching users:", error);
+        set({ isLoading: true, error: null });
+        const { users, error } = await fetchUsersAction();
+        if (users) {
+          set({ users, isLoading: false });
+        } else if (error) {
+          set({ error, isLoading: false });
         }
       },
       logState: () => {
@@ -63,7 +62,7 @@ export const useStore = create<StoreState>()(
             get().user,
             "logged in:",
             get().isLoggedIn,
-            "users:",
+            "Users:",
             get().users
           );
         }, 100);
