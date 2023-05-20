@@ -117,7 +117,10 @@ export const fetchGamesAction = async (): Promise<{
 };
 
 export interface CreateGameData {
-  player2: {};
+  player2: {
+    _id: string;
+    username: string;
+  };
   error?: string;
   _id: string;
 }
@@ -151,5 +154,58 @@ export const createGameAction = async (
     }
   } catch (error) {
     return { error: error instanceof Error ? error.message : "unknown error" };
+  }
+};
+
+export interface PieceData {
+  type: string;
+  color: string;
+  position: string;
+  hasMoved?: boolean;
+}
+
+export interface MoveHistoryData {
+  from: string;
+  to: string;
+  piece: string;
+  color: "white" | "black";
+  promotion?: string;
+}
+
+export interface specificGameData {
+  player1: { _id: string; username: string };
+  player2: { _id: string; username: string };
+  boardState: PieceData[];
+  currentPlayer: { _id: string };
+  moveHistory: MoveHistoryData[];
+}
+
+export const fetchSpecificGameAction = async (): Promise<{
+  gameData: specificGameData;
+  error?: string;
+}> => {
+  try {
+    const response = await fetch("http://localhost:3001/games/:gameId", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+      }
+    });
+    if (response.ok) {
+      const specificGame: specificGameData = await response.json();
+      return { specificGame };
+    } else {
+      const statusCode = response.status;
+      let customErrorMessage = "Unknown error occurred while fetching games.";
+      if (statusCode === 403) {
+        customErrorMessage =
+          "Forbidden. You don't have permission to access game data.";
+      } else if (statusCode === 500) {
+        customErrorMessage = "Server error occurred while fetching games.";
+      }
+
+      return { error: customErrorMessage };
+    }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 };

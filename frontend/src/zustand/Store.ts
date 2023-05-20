@@ -71,18 +71,16 @@ export const useStore = create<StoreState>()(
         }
       },
       logState: () => {
-        setTimeout(() => {
-          console.log(
-            "Current user:",
-            get().user,
-            "logged in:",
-            get().isLoggedIn,
-            "Users:",
-            get().users,
-            "Games:",
-            get().userGames
-          );
-        }, 100);
+        console.log(
+          "Current user:",
+          get().user,
+          "logged in:",
+          get().isLoggedIn,
+          "Users:",
+          get().users,
+          "Games:",
+          get().userGames
+        );
       }
     }),
     {
