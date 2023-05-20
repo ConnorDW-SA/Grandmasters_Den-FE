@@ -6,7 +6,9 @@ import {
   fetchUsersAction,
   allUserData,
   fetchGamesAction,
-  gameData
+  gameData,
+  specificGameData,
+  fetchSpecificGameAction
 } from "./Actions";
 
 interface User {
@@ -20,6 +22,8 @@ interface StoreState {
   userGames: gameData[] | null;
   fetchUsers: () => Promise<void>;
   fetchGames: () => Promise<void>;
+  currentGame: specificGameData | null;
+  fetchCurrentGame: (gameId: string) => Promise<void>;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
@@ -36,6 +40,7 @@ export const useStore = create<StoreState>()(
       user: null,
       users: [],
       userGames: [],
+      currentGame: null,
       isLoggedIn: false,
       isLoading: false,
       error: null,
@@ -70,6 +75,15 @@ export const useStore = create<StoreState>()(
           set({ error, isLoading: false });
         }
       },
+      fetchCurrentGame: async (gameId: string) => {
+        set({ isLoading: true, error: null });
+        const { gameData, error } = await fetchSpecificGameAction(gameId);
+        if (gameData) {
+          set({ currentGame: gameData, isLoading: false });
+        } else if (error) {
+          set({ error, isLoading: false });
+        }
+      },
       logState: () => {
         console.log(
           "Current user:",
@@ -79,7 +93,9 @@ export const useStore = create<StoreState>()(
           "Users:",
           get().users,
           "Games:",
-          get().userGames
+          get().userGames,
+          "Current game:",
+          get().currentGame
         );
       }
     }),

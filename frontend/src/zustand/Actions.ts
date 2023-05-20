@@ -180,19 +180,21 @@ export interface specificGameData {
   moveHistory: MoveHistoryData[];
 }
 
-export const fetchSpecificGameAction = async (): Promise<{
-  gameData: specificGameData;
+export const fetchSpecificGameAction = async (
+  gameId: string
+): Promise<{
+  gameData?: specificGameData;
   error?: string;
 }> => {
   try {
-    const response = await fetch("http://localhost:3001/games/:gameId", {
+    const response = await fetch(`http://localhost:3001/games/${gameId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`
       }
     });
     if (response.ok) {
-      const specificGame: specificGameData = await response.json();
-      return { specificGame };
+      const gameData: specificGameData = await response.json();
+      return { gameData };
     } else {
       const statusCode = response.status;
       let customErrorMessage = "Unknown error occurred while fetching games.";
