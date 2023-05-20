@@ -74,13 +74,16 @@ export const fetchUsersAction = async (): Promise<{
   }
 };
 
+export interface userDataGame {
+  _id: string;
+  username: string;
+  email: string;
+}
+
 export interface gameData {
   _id: string;
-  player1: object;
-  player2: object;
-  boardState: object;
-  currentPlayer: object;
-  moveHistory: [];
+  player1: userDataGame;
+  player2: userDataGame;
 }
 
 export const fetchGamesAction = async (): Promise<{

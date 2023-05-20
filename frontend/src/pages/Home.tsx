@@ -21,7 +21,6 @@ const HomePage: React.FC = () => {
       navigate(`/game/${newGame._id}`);
     } else {
       console.error(error);
-      // handle error...
     }
   };
 
@@ -55,7 +54,7 @@ const HomePage: React.FC = () => {
             <ul>
               {games.map((game) => (
                 <ul key={game._id}>
-                  {/* {getOpponentUsername(game, currentUser?._id)} */}
+                  {game.player2.username}
                   <button onClick={() => navigate(`/game/${game._id}`)}>
                     Join Game
                   </button>

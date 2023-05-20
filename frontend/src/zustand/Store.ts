@@ -73,7 +73,7 @@ export const useStore = create<StoreState>()(
       logState: () => {
         setTimeout(() => {
           console.log(
-            "Current state:",
+            "Current user:",
             get().user,
             "logged in:",
             get().isLoggedIn,
