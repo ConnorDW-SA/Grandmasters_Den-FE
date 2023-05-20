@@ -39,7 +39,7 @@ export const loginRegisterAction = async ({
 };
 
 export interface allUserData {
-  id: string;
+  _id: string;
   email: string;
   username: string;
 }
@@ -75,7 +75,7 @@ export const fetchUsersAction = async (): Promise<{
 };
 
 export interface gameData {
-  id: string;
+  _id: string;
   player1: object;
   player2: object;
   boardState: object;
@@ -84,7 +84,7 @@ export interface gameData {
 }
 
 export const fetchGamesAction = async (): Promise<{
-  games?: gameData[];
+  userGames?: gameData[];
   error?: string;
 }> => {
   try {
@@ -94,8 +94,8 @@ export const fetchGamesAction = async (): Promise<{
       }
     });
     if (response.ok) {
-      const games: gameData[] = await response.json();
-      return { games };
+      const userGames: gameData[] = await response.json();
+      return { userGames };
     } else {
       const statusCode = response.status;
       let customErrorMessage = "Unknown error occurred while fetching games.";
@@ -110,5 +110,43 @@ export const fetchGamesAction = async (): Promise<{
     }
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unknown error" };
+  }
+};
+
+export interface CreateGameData {
+  player2: {};
+  error?: string;
+  _id: string;
+}
+
+export const createGameAction = async (
+  player2Id: string
+): Promise<{
+  newGame?: CreateGameData;
+  error?: string;
+}> => {
+  console.log(player2Id);
+  try {
+    const response = await fetch("http://localhost:3001/games/createGame", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ player2: player2Id })
+    });
+    if (response.ok) {
+      const newGame = await response.json();
+      return { newGame: { ...newGame } };
+    } else {
+      const statusCode = response.status;
+      let customErrorMessage = "Unknown error";
+      if (statusCode === 401) {
+        customErrorMessage = "Failed to create game";
+      }
+      return { error: customErrorMessage };
+    }
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "unknown error" };
   }
 };

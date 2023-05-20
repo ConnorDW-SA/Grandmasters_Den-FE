@@ -82,3 +82,47 @@
   background-color: rgba(0, 0, 0, 0.3);
   transition: 0.5s;
 }
+
+/* ---------------- Board ---------------- */
+
+.chess-piece {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.board-square {
+  width: 60px;
+  height: 60px;
+}
+
+.black-square {
+  background-color: #b58863;
+}
+
+.white-square {
+  background-color: #f0d9b5;
+}
+
+/* -------------------- Main --------------- */
+
+.main-section-one {
+  background-color: #0e0e12;
+}
+
+.test {
+  animation: fadeInTitle 2.5s ease;
+  color: white;
+}
+
+@keyframes fadeInTitle {
+  from {
+    opacity: 0;
+    transform: translateY(-15%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

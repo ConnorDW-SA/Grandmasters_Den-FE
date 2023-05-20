@@ -11,12 +11,13 @@ import {
 
 interface User {
   username: string;
+  _id: string;
 }
 
 interface StoreState {
   user: User | null;
   users: allUserData[] | null;
-  games: gameData[] | null;
+  userGames: gameData[] | null;
   fetchUsers: () => Promise<void>;
   fetchGames: () => Promise<void>;
   isLoggedIn: boolean;
@@ -34,7 +35,7 @@ export const useStore = create<StoreState>()(
     (set, get) => ({
       user: null,
       users: [],
-      games: [],
+      userGames: [],
       isLoggedIn: false,
       isLoading: false,
       error: null,
@@ -62,9 +63,9 @@ export const useStore = create<StoreState>()(
       },
       fetchGames: async () => {
         set({ isLoading: true, error: null });
-        const { games, error } = await fetchGamesAction();
-        if (games) {
-          set({ games, isLoading: false });
+        const { userGames, error } = await fetchGamesAction();
+        if (userGames) {
+          set({ userGames, isLoading: false });
         } else if (error) {
           set({ error, isLoading: false });
         }
@@ -77,7 +78,9 @@ export const useStore = create<StoreState>()(
             "logged in:",
             get().isLoggedIn,
             "Users:",
-            get().users
+            get().users,
+            "Games:",
+            get().userGames
           );
         }, 100);
       }
