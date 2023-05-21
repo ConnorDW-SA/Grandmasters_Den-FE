@@ -1,5 +1,5 @@
 import React from "react";
-import { specificGameData } from "../../zustand/Actions";
+
 import BlackKing from "../../assets/pieces/b-king.png";
 import BlackQueen from "../../assets/pieces/b-queen.png";
 import BlackBishop from "../../assets/pieces/b-bishop.png";
@@ -13,12 +13,19 @@ import WhiteKnight from "../../assets/pieces/w-knight.png";
 import WhiteRook from "../../assets/pieces/w-rook.png";
 import WhitePawn from "../../assets/pieces/w-pawn.png";
 
-interface BoardProps {
-  onMove: (oldPosition: string, newPosition: string, hasMoved: boolean) => void;
-  gameState: specificGameData | null;
-}
 type PieceColor = "black" | "white";
 type PieceType = "king" | "queen" | "bishop" | "knight" | "rook" | "pawn";
+
+interface PieceData {
+  type: PieceType;
+  color: PieceColor;
+  position: string;
+}
+
+interface BoardProps {
+  onMove: (oldPosition: string, newPosition: string, hasMoved: boolean) => void;
+  gameState: { boardState: PieceData[] } | null;
+}
 
 const ChessBoard: React.FC<BoardProps> = ({ onMove, gameState }) => {
   if (!gameState) return null;
@@ -62,8 +69,8 @@ const ChessBoard: React.FC<BoardProps> = ({ onMove, gameState }) => {
             >
               {piece && (
                 <img
-                  src={piece ? pieceImages[piece.color][piece.type] : ""}
-                  alt={piece ? piece.type : ""}
+                  src={pieceImages[piece.color][piece.type]}
+                  alt={piece.type}
                   className={`chess-piece ${piece.color}-${piece.type}`}
                 />
               )}

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useStore, User } from "../zustand/Store";
-import { createGameAction, gameData } from "../zustand/Actions";
+import React, { useEffect } from "react";
+import { useStore, allUserData, gameData } from "../zustand/Store";
+
 import { useNavigate } from "react-router-dom";
 
 const HomePage: React.FC = () => {
@@ -9,13 +9,18 @@ const HomePage: React.FC = () => {
   const fetchGames = useStore((state) => state.fetchGames);
   const navigate = useNavigate();
   const currentUser = useStore((state) => state.user);
+  const createGame = useStore((state) => state.createGame);
   const games = useStore((state) => state.userGames);
   const users = useStore((state) => state.users);
-
-  const getOpponentUsername = (game: gameData, currentUser: User | null) => {
-    return game.player1._id === currentUser?._id
-      ? game.player2.username
-      : game.player1.username;
+  console.log(users);
+  const getOpponentUsername = (
+    currentUser: allUserData | null,
+    game: gameData
+  ) => {
+    const { player1, player2 } = game;
+    return player1?._id === currentUser?._id
+      ? player2.username
+      : player1?.username;
   };
 
   useEffect(() => {
@@ -23,31 +28,27 @@ const HomePage: React.FC = () => {
     fetchGames();
     logState();
   }, [fetchUsers, logState, fetchGames]);
-  const createGame = async (player2Id: string) => {
-    const { newGame, error } = await createGameAction(player2Id);
-    if (newGame) {
-      navigate(`/game/${newGame._id}`);
-    } else {
-      console.error(error);
-    }
+  const createGameAction = async (player2Id: string) => {
+    await createGame(player2Id);
+    fetchGames();
+    navigate(`/game/${player2Id}`);
   };
+
   return (
     <div className="main-section-one">
-      <div className="">
-        <h1 className="test text-dark">Welcome {currentUser?.username}</h1>
-      </div>
+      <h1 className="test text-dark">Welcome {currentUser?.username}</h1>
       <div className="">
         <div className="">
           <h1>users</h1>
           {users && users.length > 0 ? (
             <ul>
               {users.map((user) => (
-                <ul key={user._id}>
+                <li key={user._id}>
                   {user.username}{" "}
-                  <button onClick={() => createGame(user._id)}>
+                  <button onClick={() => createGameAction(user._id)}>
                     Create Game
                   </button>
-                </ul>
+                </li>
               ))}
             </ul>
           ) : (
@@ -60,12 +61,12 @@ const HomePage: React.FC = () => {
           {games && games.length > 0 ? (
             <ul>
               {games.map((game) => (
-                <ul key={game._id}>
-                  {getOpponentUsername(game, currentUser)}
+                <li key={game._id}>
+                  {getOpponentUsername(currentUser, game)}
                   <button onClick={() => navigate(`/game/${game._id}`)}>
                     Join Game
                   </button>
-                </ul>
+                </li>
               ))}
             </ul>
           ) : (

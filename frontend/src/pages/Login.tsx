@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
     if (isLoggedIn) {
       navigate(`/home/${username}`);
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, username]);
 
   const switchForm = () => {
     setIsLogin(!isLogin);
