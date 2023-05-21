@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useStore } from "../zustand/Store";
-import { createGameAction } from "../zustand/Actions";
+import { useStore, User } from "../zustand/Store";
+import { createGameAction, gameData } from "../zustand/Actions";
 import { useNavigate } from "react-router-dom";
+
 const HomePage: React.FC = () => {
   const logState = useStore((state) => state.logState);
   const fetchUsers = useStore((state) => state.fetchUsers);
@@ -10,6 +11,13 @@ const HomePage: React.FC = () => {
   const currentUser = useStore((state) => state.user);
   const games = useStore((state) => state.userGames);
   const users = useStore((state) => state.users);
+
+  const getOpponentUsername = (game: gameData, currentUser: User | null) => {
+    return game.player1._id === currentUser?._id
+      ? game.player2.username
+      : game.player1.username;
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchGames();
@@ -23,7 +31,6 @@ const HomePage: React.FC = () => {
       console.error(error);
     }
   };
-
   return (
     <div className="main-section-one">
       <div className="">
@@ -54,7 +61,7 @@ const HomePage: React.FC = () => {
             <ul>
               {games.map((game) => (
                 <ul key={game._id}>
-                  {game.player2.username}
+                  {getOpponentUsername(game, currentUser)}
                   <button onClick={() => navigate(`/game/${game._id}`)}>
                     Join Game
                   </button>

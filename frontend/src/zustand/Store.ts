@@ -11,7 +11,7 @@ import {
   fetchSpecificGameAction
 } from "./Actions";
 
-interface User {
+export interface User {
   username: string;
   _id: string;
 }
@@ -24,6 +24,12 @@ interface StoreState {
   fetchGames: () => Promise<void>;
   currentGame: specificGameData | null;
   fetchCurrentGame: (gameId: string) => Promise<void>;
+  updateGameState: (
+    gameId: string,
+    oldPosition: string,
+    newPosition: string,
+    hasMoved: boolean
+  ) => Promise<void>;
   isLoggedIn: boolean;
   isLoading: boolean;
   error: string | null;
@@ -84,6 +90,34 @@ export const useStore = create<StoreState>()(
           set({ error, isLoading: false });
         }
       },
+      updateGameState: async (
+        gameId: string,
+        oldPosition: string,
+        newPosition: string,
+        hasMoved: boolean
+      ) => {
+        set({ isLoading: true, error: null });
+
+        const requestBody = { oldPosition, newPosition, hasMoved };
+
+        const response = await fetch(`http://localhost:3001/games/${gameId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+          const updatedGame: specificGameData = await response.json();
+          set({ currentGame: updatedGame, isLoading: false });
+        } else {
+          const error = await response.text();
+          set({ error, isLoading: false });
+        }
+      },
+
       logState: () => {
         console.log(
           "Current user:",
