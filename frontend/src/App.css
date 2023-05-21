@@ -104,6 +104,16 @@
   background-color: #f0d9b5;
 }
 
+.chessboard {
+  display: flex;
+  flex-wrap: wrap;
+  width: 480px;
+}
+
+.board-square.rotate {
+  transform: rotate(180deg);
+}
+
 /* -------------------- Main --------------- */
 
 .main-section-one {

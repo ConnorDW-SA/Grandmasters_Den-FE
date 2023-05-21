@@ -15,6 +15,7 @@ const GamePage: React.FC = () => {
   const updateGameState = useStore((state) => state.updateGameState);
   const [socket, setSocket] = useState<Socket | null>(null);
   const currentGame = useStore((state) => state.currentGame);
+
   useEffect(() => {
     logState();
     if (gameId) {

@@ -171,12 +171,18 @@ export interface MoveHistoryData {
   color: "white" | "black";
   promotion?: string;
 }
+type PieceColor = "black" | "white";
+type PieceType = "king" | "queen" | "bishop" | "knight" | "rook" | "pawn";
 
 export interface specificGameData {
   player1: { _id: string; username: string };
   player2: { _id: string; username: string };
-  boardState: PieceData[];
-  currentPlayer: { _id: string };
+  boardState: Array<{
+    color: PieceColor;
+    type: PieceType;
+    position: string;
+  }>;
+
   moveHistory: MoveHistoryData[];
 }
 
