@@ -1,5 +1,3 @@
-import React from "react";
-
 import BlackKing from "../../assets/pieces/b-king.png";
 import BlackQueen from "../../assets/pieces/b-queen.png";
 import BlackBishop from "../../assets/pieces/b-bishop.png";
@@ -13,24 +11,36 @@ import WhiteKnight from "../../assets/pieces/w-knight.png";
 import WhiteRook from "../../assets/pieces/w-rook.png";
 import WhitePawn from "../../assets/pieces/w-pawn.png";
 
+import React from "react";
+import { useStore, GameData } from "../../zustand/Store";
+import { useParams } from "react-router-dom";
+import { Socket } from "socket.io-client";
 type PieceColor = "black" | "white";
 type PieceType = "king" | "queen" | "bishop" | "knight" | "rook" | "pawn";
 
-interface PieceData {
-  type: PieceType;
-  color: PieceColor;
-  position: string;
+type ParamTypes = {
+  gameId: string;
+};
+
+interface ChessBoardProps {
+  gameState: GameData | null;
+  socket: Socket | null;
+  userColor: PieceColor;
 }
 
-interface BoardProps {
-  onMove: (oldPosition: string, newPosition: string, hasMoved: boolean) => void;
-  gameState: { boardState: PieceData[] } | null;
-}
+const ChessBoard: React.FC<ChessBoardProps> = ({
+  gameState,
+  socket,
+  userColor
+}) => {
+  const { gameId } = useParams<ParamTypes>();
 
-const ChessBoard: React.FC<BoardProps> = ({ onMove, gameState }) => {
+  const updateCurrentGame = useStore((state) => state.updateCurrentGame);
+
   if (!gameState) return null;
 
   const { boardState } = gameState;
+
   const pieceImages: Record<PieceColor, Record<PieceType, string>> = {
     black: {
       king: BlackKing,
@@ -53,6 +63,23 @@ const ChessBoard: React.FC<BoardProps> = ({ onMove, gameState }) => {
   const chessRows = ["8", "7", "6", "5", "4", "3", "2", "1"];
   const chessColumns = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const pieceId = event.dataTransfer.getData("application/reactflow");
+    if (gameId && gameState && socket) {
+      const newGameState = JSON.parse(JSON.stringify(gameState));
+      const piece = newGameState.boardState.find(
+        (p: { position: string }) => p.position === pieceId
+      );
+      if (piece) {
+        if (piece.color !== userColor) return;
+        piece.position = (event.target as HTMLElement).id;
+        socket.emit("move", gameId, newGameState);
+        updateCurrentGame(newGameState);
+      }
+    }
+  };
+
   return (
     <div className="chessboard">
       {chessRows.map((row, i) =>
@@ -61,17 +88,29 @@ const ChessBoard: React.FC<BoardProps> = ({ onMove, gameState }) => {
           const piece = boardState.find((p) => p.position === position);
           const squareColor =
             (i + j) % 2 === 0 ? "white-square" : "black-square";
+
           return (
             <div
               key={position}
               id={position}
               className={`board-square ${squareColor}`}
+              onDragOver={(event) => {
+                event.preventDefault();
+              }}
+              onDrop={handleDrop}
             >
               {piece && (
                 <img
                   src={pieceImages[piece.color][piece.type]}
                   alt={piece.type}
                   className={`chess-piece ${piece.color}-${piece.type}`}
+                  draggable="true"
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData(
+                      "application/reactflow",
+                      piece.position
+                    );
+                  }}
                 />
               )}
             </div>

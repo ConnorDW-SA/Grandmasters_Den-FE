@@ -7,17 +7,34 @@ export interface loginRegisterData {
   username?: string;
 }
 
-export interface allUserData {
+export interface UserData {
   _id: string;
   email?: string;
   username?: string;
 }
 
-export interface gameData {
+export interface PieceState {
+  color: "black" | "white";
+  type: "king" | "queen" | "bishop" | "knight" | "rook" | "pawn";
+  position: string;
+  hasMoved: boolean;
+}
+
+export interface Move {
+  color: "white" | "black";
+  piece: string;
+  from: string;
+  to: string;
+  promotion?: string;
+}
+
+export interface GameData {
   _id: string;
-  player1?: allUserData;
-  player2: allUserData;
-  error?: string;
+  player1: UserData;
+  player2: UserData;
+  boardState: PieceState[];
+  currentPlayer: UserData;
+  moveHistory: Move[];
 }
 
 export enum ErrorMessages {
@@ -29,18 +46,19 @@ export enum ErrorMessages {
 interface StoreState {
   isLoading: boolean;
   error: string | null;
-  user: allUserData | null;
+  user: UserData | null;
   loginRegister: (data: loginRegisterData) => Promise<void>;
   isLoggedIn: boolean;
   setLoginState: (isLoggedIn: boolean) => void;
-  setUser: (user: allUserData | null) => void;
-  users: allUserData[] | null;
+  setUser: (user: UserData | null) => void;
+  users: UserData[] | null;
   fetchUsers: () => Promise<void>;
-  userGames: gameData[] | null;
-  newGame: gameData | null;
-  createGame: (player2Id: string) => Promise<void>;
+  userGames: GameData[] | null;
   fetchGames: () => Promise<void>;
   logState: () => void;
+  currentGame: GameData | null;
+  fetchCurrentGame: (gameId: string) => Promise<void>;
+  updateCurrentGame: (game: GameData) => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -49,7 +67,7 @@ export const useStore = create<StoreState>()(
       user: null,
       users: [],
       userGames: [],
-      newGame: null,
+      currentGame: null,
       isLoggedIn: false,
       isLoading: false,
       error: null,
@@ -77,7 +95,7 @@ export const useStore = create<StoreState>()(
           set({ error: ErrorMessages.ServerError, isLoading: false });
         }
       },
-      setUser: (user: allUserData | null) => set({ user }),
+      setUser: (user: UserData | null) => set({ user }),
       setLoginState: (isLoggedIn: boolean) => set({ isLoggedIn }),
       fetchUsers: async () => {
         set({ isLoading: true, error: null });
@@ -88,7 +106,7 @@ export const useStore = create<StoreState>()(
             }
           });
           if (response.ok) {
-            const users: allUserData[] = await response.json();
+            const users: UserData[] = await response.json();
             set({ users, isLoading: false });
           } else {
             set({ error: ErrorMessages.ServerError, isLoading: false });
@@ -109,7 +127,7 @@ export const useStore = create<StoreState>()(
             }
           );
           if (response.ok) {
-            const userGames: gameData[] = await response.json();
+            const userGames: GameData[] = await response.json();
             set({ userGames, isLoading: false });
           } else {
             set({ error: ErrorMessages.ServerError, isLoading: false });
@@ -118,23 +136,20 @@ export const useStore = create<StoreState>()(
           set({ error: ErrorMessages.ServerError, isLoading: false });
         }
       },
-      createGame: async (player2Id: string) => {
+      fetchCurrentGame: async (gameId: string) => {
         set({ isLoading: true, error: null });
         try {
           const response = await fetch(
-            "http://localhost:3001/games/createGame",
+            `http://localhost:3001/games/${gameId}`,
             {
-              method: "POST",
               headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ player2: player2Id })
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+              }
             }
           );
           if (response.ok) {
-            const newGame = await response.json();
-            set({ newGame: { ...newGame }, isLoading: false });
+            const gameData: GameData = await response.json();
+            set({ currentGame: gameData, isLoading: false });
           } else {
             set({ error: ErrorMessages.ServerError, isLoading: false });
           }
@@ -142,6 +157,32 @@ export const useStore = create<StoreState>()(
           set({ error: ErrorMessages.ServerError, isLoading: false });
         }
       },
+      updateCurrentGame: async (game: GameData) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await fetch(
+            `http://localhost:3001/games/${game._id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+              },
+              body: JSON.stringify(game)
+            }
+          );
+
+          if (response.ok) {
+            const updatedGameData: GameData = await response.json();
+            set({ currentGame: updatedGameData, isLoading: false });
+          } else {
+            set({ error: ErrorMessages.ServerError, isLoading: false });
+          }
+        } catch (error) {
+          set({ error: ErrorMessages.ServerError, isLoading: false });
+        }
+      },
+
       logState: () => {
         console.log(
           "Current user:",

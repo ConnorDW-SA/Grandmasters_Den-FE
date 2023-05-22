@@ -1,21 +1,21 @@
 import React, { useEffect } from "react";
-import { useStore, allUserData, gameData } from "../zustand/Store";
+import { useStore, UserData, GameData } from "../zustand/Store";
 
 import { useNavigate } from "react-router-dom";
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate();
   const logState = useStore((state) => state.logState);
+
+  const currentUser = useStore((state) => state.user);
   const fetchUsers = useStore((state) => state.fetchUsers);
   const fetchGames = useStore((state) => state.fetchGames);
-  const navigate = useNavigate();
-  const currentUser = useStore((state) => state.user);
-  const createGame = useStore((state) => state.createGame);
   const games = useStore((state) => state.userGames);
   const users = useStore((state) => state.users);
-  console.log(users);
+
   const getOpponentUsername = (
-    currentUser: allUserData | null,
-    game: gameData
+    currentUser: UserData | null,
+    game: GameData
   ) => {
     const { player1, player2 } = game;
     return player1?._id === currentUser?._id
@@ -28,10 +28,27 @@ const HomePage: React.FC = () => {
     fetchGames();
     logState();
   }, [fetchUsers, logState, fetchGames]);
-  const createGameAction = async (player2Id: string) => {
-    await createGame(player2Id);
-    fetchGames();
-    navigate(`/game/${player2Id}`);
+
+  const createGame = async (player2Id: string) => {
+    try {
+      const response = await fetch("http://localhost:3001/games/createGame", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        },
+        body: JSON.stringify({ player2: player2Id })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const game = await response.json();
+      console.log(game);
+      navigate(`/game/${game._id}`);
+    } catch (error) {
+      console.error("Failed to create game", error);
+    }
   };
 
   return (
@@ -45,7 +62,7 @@ const HomePage: React.FC = () => {
               {users.map((user) => (
                 <li key={user._id}>
                   {user.username}{" "}
-                  <button onClick={() => createGameAction(user._id)}>
+                  <button onClick={() => createGame(user._id)}>
                     Create Game
                   </button>
                 </li>
