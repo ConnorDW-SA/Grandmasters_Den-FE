@@ -49,6 +49,7 @@ interface StoreState {
   user: UserData | null;
   loginRegister: (data: loginRegisterData) => Promise<void>;
   isLoggedIn: boolean;
+  logout: () => void;
   setLoginState: (isLoggedIn: boolean) => void;
   setUser: (user: UserData | null) => void;
   users: UserData[] | null;
@@ -95,6 +96,17 @@ export const useStore = create<StoreState>()(
           set({ error: ErrorMessages.ServerError, isLoading: false });
         }
       },
+      logout: () => {
+        localStorage.removeItem("accessToken");
+        set({
+          user: null,
+          users: null,
+          userGames: null,
+          currentGame: null,
+          isLoggedIn: false
+        });
+      },
+
       setUser: (user: UserData | null) => set({ user }),
       setLoginState: (isLoggedIn: boolean) => set({ isLoggedIn }),
       fetchUsers: async () => {
