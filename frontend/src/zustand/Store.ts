@@ -60,6 +60,8 @@ interface StoreState {
   currentGame: GameData | null;
   fetchCurrentGame: (gameId: string) => Promise<void>;
   updateCurrentGame: (game: GameData) => Promise<void>;
+  currentPlayerId: string | null;
+  setCurrentPlayerId: (id: string | null) => void;
 }
 
 export const useStore = create<StoreState>()(
@@ -72,6 +74,8 @@ export const useStore = create<StoreState>()(
       isLoggedIn: false,
       isLoading: false,
       error: null,
+      currentPlayerId: null,
+
       loginRegister: async (data: loginRegisterData) => {
         set({ isLoading: true, error: null });
         try {
@@ -194,7 +198,7 @@ export const useStore = create<StoreState>()(
           set({ error: ErrorMessages.ServerError, isLoading: false });
         }
       },
-
+      setCurrentPlayerId: (id: string | null) => set({ currentPlayerId: id }),
       logState: () => {
         console.log(
           "Current user:",

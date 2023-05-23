@@ -15,6 +15,13 @@ import React from "react";
 import { useStore, GameData } from "../../zustand/Store";
 import { useParams } from "react-router-dom";
 import { Socket } from "socket.io-client";
+import {
+  isDiagonalMove,
+  isHorizontalMove,
+  isVerticalMove,
+  isMoveObstructed,
+  isSameColorPiece
+} from "./utility/GameLogic";
 type PieceColor = "black" | "white";
 type PieceType = "king" | "queen" | "bishop" | "knight" | "rook" | "pawn";
 
