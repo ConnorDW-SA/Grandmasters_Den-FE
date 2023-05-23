@@ -26,12 +26,14 @@ interface ChessBoardProps {
   gameState: GameData | null;
   socket: Socket | null;
   userColor: PieceColor;
+  userId: string | undefined;
 }
 
 const ChessBoard: React.FC<ChessBoardProps> = ({
   gameState,
   socket,
-  userColor
+  userColor,
+  userId
 }) => {
   const { gameId } = useParams<ParamTypes>();
 
@@ -71,9 +73,22 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
       const piece = newGameState.boardState.find(
         (p: { position: string }) => p.position === pieceId
       );
+      const targetPosition = (event.currentTarget as HTMLElement).id;
+      if (gameState.currentPlayer !== userId) return;
+
       if (piece) {
         if (piece.color !== userColor) return;
-        piece.position = (event.target as HTMLElement).id;
+        console.log("usercolor:", userColor);
+
+        const targetPieceIndex = newGameState.boardState.findIndex(
+          (p: { position: string }) => p.position === targetPosition
+        );
+        if (targetPieceIndex >= 0) {
+          newGameState.boardState.splice(targetPieceIndex, 1);
+        }
+
+        piece.position = targetPosition;
+
         socket.emit("move", gameId, newGameState);
         updateCurrentGame(newGameState);
       }

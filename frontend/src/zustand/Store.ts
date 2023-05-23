@@ -33,7 +33,7 @@ export interface GameData {
   player1: UserData;
   player2: UserData;
   boardState: PieceState[];
-  currentPlayer: UserData;
+  currentPlayer: string;
   moveHistory: Move[];
 }
 
@@ -186,7 +186,7 @@ export const useStore = create<StoreState>()(
 
           if (response.ok) {
             const updatedGameData: GameData = await response.json();
-            set({ currentGame: updatedGameData, isLoading: false });
+            set({ currentGame: { ...updatedGameData }, isLoading: false });
           } else {
             set({ error: ErrorMessages.ServerError, isLoading: false });
           }

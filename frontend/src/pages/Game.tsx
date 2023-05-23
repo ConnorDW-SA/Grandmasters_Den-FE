@@ -29,7 +29,27 @@ const GamePage: React.FC = () => {
 
     newSocket.emit("fetch_game", gameId);
 
+    newSocket.on("move_made", () => {
+      fetchCurrentGame(gameId);
+      console.log(currentGame?.currentPlayer);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [fetchCurrentGame, gameId, currentGame?.currentPlayer]);
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:3001", {
+      transports: ["websocket"]
+    });
+
+    newSocket.emit("fetch_game", gameId);
+
     newSocket.on("game_updated", (updatedGame: GameData) => {
+      console.log(updatedGame);
       updateCurrentGame(updatedGame);
     });
 
@@ -49,6 +69,7 @@ const GamePage: React.FC = () => {
         gameState={currentGame}
         socket={socket}
         userColor={userColor}
+        userId={currentUserId}
       />
     </div>
   );
