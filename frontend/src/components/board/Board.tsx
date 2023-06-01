@@ -10,7 +10,6 @@ import WhiteBishop from "../../assets/pieces/w-bishop.png";
 import WhiteKnight from "../../assets/pieces/w-knight.png";
 import WhiteRook from "../../assets/pieces/w-rook.png";
 import WhitePawn from "../../assets/pieces/w-pawn.png";
-
 import React from "react";
 import { useStore, GameData } from "../../zustand/Store";
 import { useParams } from "react-router-dom";
